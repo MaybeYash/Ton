@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TonConnect Wallet Integration</title>
-  <!-- Import React, ReactDOM, and MUI for UI components -->
+  <!-- Import React and ReactDOM -->
   <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Import MUI for UI components -->
   <script src="https://cdn.jsdelivr.net/npm/@mui/material/umd/material-ui.development.js"></script>
-  <!-- Import TonConnect UI -->
+  <!-- Import TonConnect UI React and SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui-react/dist/tonconnect-ui-react.umd.js"></script>
-  <!-- Import TonConnect SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@next/dist/tonconnect-sdk.umd.min.js"></script>
   <style>
     body {
@@ -20,7 +20,8 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background: #f0f2f5;
+      background: #282c34;
+      color: white;
     }
     .container {
       text-align: center;
@@ -30,10 +31,11 @@
 <body>
   <div id="root" class="container"></div>
   <script type="text/javascript">
-    // Import necessary components from the UMD bundles
+    // Import necessary components from UMD bundles
+    const { TonConnectUIProvider, useTonConnectUI, THEME } = window["@tonconnect/ui-react"];
     const { Button, styled } = window["MaterialUI"];
-    const { TonConnectUIProvider, useTonConnectUI } = window["@tonconnect/ui-react"];
 
+    // Create a basic AppButton component using Material UI
     const AppButton = ({ background, hoverBackground, height, fontSize, fontWeight, textColor, children, onClick }) => {
       const StyledButton = styled(Button)(({ theme }) => ({
         background: background || "#1976d2",
@@ -48,13 +50,10 @@
         },
       }));
 
-      return (
-        <StyledButton onClick={onClick}>
-          {children}
-        </StyledButton>
-      );
+      return <StyledButton onClick={onClick}>{children}</StyledButton>;
     };
 
+    // Define the ConnectButton component using useTonConnectUI hook
     const ConnectButton = () => {
       const [tonConnect] = useTonConnectUI();
       return (
@@ -67,11 +66,12 @@
           textColor="#fff"
           onClick={() => tonConnect.connectWallet()}
         >
-          Connect wallet
+          Connect Wallet
         </AppButton>
       );
     };
 
+    // Define the main App component
     const App = () => {
       return (
         <div>
@@ -81,8 +81,32 @@
       );
     };
 
-    // Render the React component
-    ReactDOM.render(<TonConnectUIProvider><App /></TonConnectUIProvider>, document.getElementById('root'));
+    // Wrap the App in TonConnectUIProvider and render it
+    const tonConnectConfig = {
+      manifestUrl: "https://ton-connect.github.io/demo-dapp-with-wallet/tonconnect-manifest.json",
+      uiPreferences: { theme: THEME.DARK },
+      walletsListConfiguration: {
+        includeWallets: [
+          {
+            appName: "telegram-wallet",
+            name: "Wallet",
+            imageUrl: "https://wallet.tg/images/logo-288.png",
+            aboutUrl: "https://wallet.tg/",
+            universalLink: "https://t.me/wallet/start",
+            bridgeUrl: "https://bridge.tonapi.io/bridge",
+            platforms: ["ios", "android", "macos", "windows", "linux"]
+          }
+        ]
+      },
+      actionsConfiguration: {
+        twaReturnUrl: 'https://t.me/WebAppWalletBot/myapp'
+      }
+    };
+
+    ReactDOM.render(
+      React.createElement(TonConnectUIProvider, tonConnectConfig, React.createElement(App)),
+      document.getElementById('root')
+    );
   </script>
 </body>
 </html>
